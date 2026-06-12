@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Levels of Prevention in Public Health</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
+        
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .group:hover .group-hover\:rotate-y-180 { transform: rotateY(180deg); }
+        
+        /* Active Recall Mode */
+        .recall-mode .reveal-text {
+            background-color: #cbd5e1; /* Slate-300 */
+            color: transparent;
+            border-radius: 4px;
+            padding: 0 6px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s, color 0.3s;
+            text-shadow: none;
+            box-shadow: inset 0 0 0 1px #94a3b8;
+        }
+        .recall-mode .reveal-text:hover, .recall-mode .reveal-text.revealed {
+            background-color: #fde047; /* Yellow-300 highlight */
+            color: #1e293b; /* Slate-800 text */
+            box-shadow: none;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(5, 150, 105, 0.8); }
+
+        .content-section { animation: fadeIn 0.4s ease-in-out; }
+        .locked-section { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        prev: {
+                            light: '#d1fae5', /* Emerald-100 */
+                            DEFAULT: '#10b981', /* Emerald-500 */
+                            dark: '#047857', /* Emerald-700 */
+                            accent: '#f59e0b', /* Amber-500 */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col md:flex-row font-sans text-slate-800 overflow-hidden">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-prev-dark text-white p-4 flex justify-between items-center shadow-md z-20 shrink-0">
+        <h1 class="font-bold text-lg"><i class="fa-solid fa-shield-halved mr-2 text-prev-accent"></i> Prevention Levels</h1>
+        <button onclick="toggleMobileMenu()" class="text-white focus:outline-none">
+            <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-72 bg-white shadow-2xl h-full absolute md:relative z-30 transition-transform duration-300 shrink-0 border-r border-slate-200">
+        <div class="p-6 bg-gradient-to-br from-prev-dark to-prev text-white hidden md:block shrink-0">
+            <h1 class="font-black text-2xl tracking-wide"><i class="fa-solid fa-shield-heart text-prev-accent mr-2"></i> PHN Review</h1>
+            <p class="text-sm text-emerald-100 mt-1 font-medium">Levels of Prevention</p>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 text-sm font-medium">
+                <li><button onclick="showSection('home')" id="btn-home" class="nav-btn w-full text-left px-6 py-3 bg-prev-light text-prev-dark border-r-4 border-prev-dark transition-colors"><i class="fa-solid fa-house w-6 nav-icon"></i><i class="fa-solid fa-lock w-6 hidden text-slate-400"></i> Home / Overview</button></li>
+                <li><button onclick="showSection('leavell')" id="btn-leavell" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-sitemap w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Leavell's Framework</button></li>
+                <li><button onclick="showSection('primordial_primary')" id="btn-primordial_primary" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-seedling w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Primordial & Primary</button></li>
+                <li><button onclick="showSection('secondary_tertiary')" id="btn-secondary_tertiary" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-stethoscope w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Secondary & Tertiary</button></li>
+                <li><button onclick="showSection('summary')" id="btn-summary" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-table-list w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Quick Reference & Mnemonics</button></li>
+                <li><button onclick="showSection('final_quiz_sec')" id="btn-final_quiz_sec" class="nav-btn w-full text-left px-6 py-3 text-slate-600 hover:bg-slate-50 transition-colors border-t border-slate-200 mt-2 locked-section"><i class="fa-solid fa-trophy w-6 text-amber-500 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Final Exam</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="flex-1 h-full overflow-y-auto bg-slate-100 relative w-full">
+        
+        <!-- Floating Active Recall Toggle -->
+        <div class="fixed top-4 right-4 md:right-8 z-40 flex items-center bg-white/90 backdrop-blur px-4 py-3 rounded-full shadow-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleRecallMode()">
+            <span class="mr-3 text-sm font-bold text-slate-700 hidden md:inline"><i class="fa-solid fa-brain text-prev-accent mr-1"></i> Active Recall</span>
+            <span class="mr-3 text-sm font-bold text-slate-700 md:hidden"><i class="fa-solid fa-brain text-prev-accent"></i></span>
+            <button id="recall-toggle" class="w-12 h-6 bg-slate-300 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner pointer-events-none">
+                <div id="recall-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow"></div>
+            </button>
+        </div>
+
+        <div class="p-4 md:p-8 max-w-5xl mx-auto pb-32">
+
+            <!-- HOME -->
+            <section id="home" class="content-section flex flex-col items-center justify-center min-h-[80vh] text-center block">
+                <div class="bg-gradient-to-br from-slate-800 to-prev-dark text-white rounded-3xl shadow-2xl p-10 md:p-16 w-full relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 text-white opacity-5 pointer-events-none">
+                        <i class="fa-solid fa-shield-virus text-[20rem]"></i>
+                    </div>
+                    
+                    <div class="relative z-10">
+                        <div class="bg-white/10 backdrop-blur-sm inline-block p-4 rounded-full text-prev-accent mb-6 shadow-sm border border-white/20">
+                            <i class="fa-solid fa-layer-group text-5xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-emerald-200 mb-2 uppercase tracking-widest">Public Health Nursing</h3>
+                        <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight drop-shadow-md">
+                            The Levels of<br/>Prevention
+                        </h1>
+                        <div class="bg-white/10 backdrop-blur inline-block px-6 py-3 rounded-full mb-10 border border-white/20">
+                            <p class="text-lg text-white font-medium">"From protecting the healthy to restoring the sick."</p>
+                        </div>
+                        <br/>
+                        <button onclick="unlockFirstSection()" class="bg-prev-accent hover:bg-amber-400 text-slate-900 font-black py-4 px-10 rounded-full shadow-xl transition-transform hover:scale-105 text-lg flex items-center mx-auto focus:outline-none">
+                            Begin Lecture <i class="fa-solid fa-arrow-right ml-3"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LEAVELL'S FRAMEWORK -->
+            <section id="leavell" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 flex items-center border-b-2 border-prev pb-3">
+                        <i class="fa-solid fa-sitemap text-prev mr-4"></i> Leavell & Clark's Framework
+                    </h2>
+                    
+                    <p class="text-lg text-slate-700 mb-6">
+                        Health education and public health interventions cover a continuum known as Leavell's Levels of Prevention. This framework divides prevention into distinct phases based on the natural history of a disease.
+                    </p>
+
+                    <div class="grid gap-4 md:grid-cols-3 mb-8">
+                        <div class="bg-emerald-50 rounded-xl p-5 border border-emerald-200 shadow-sm flex flex-col justify-center items-center text-center">
+                            <h3 class="font-black text-xl text-emerald-800 mb-2">Primary Prevention</h3>
+                            <p class="text-emerald-700 font-bold mb-3"><span class="reveal-text">Health Promotion</span> <br>+<br> <span class="reveal-text">Specific Protection</span></p>
+                            <p class="text-sm text-emerald-600">Action taken <em>before</em> the disease occurs.</p>
+                        </div>
+
+                        <div class="bg-amber-50 rounded-xl p-5 border border-amber-200 shadow-sm flex flex-col justify-center items-center text-center">
+                            <h3 class="font-black text-xl text-amber-800 mb-2">Secondary Prevention</h3>
+                            <p class="text-amber-700 font-bold mb-3"><span class="reveal-text">Early Diagnosis</span> <br>+<br> <span class="reveal-text">Prompt Treatment</span></p>
+                            <p class="text-sm text-amber-600">Action taken to <em>halt</em> the disease process early.</p>
+                        </div>
+
+                        <div class="bg-rose-50 rounded-xl p-5 border border-rose-200 shadow-sm flex flex-col justify-center items-center text-center">
+                            <h3 class="font-black text-xl text-rose-800 mb-2">Tertiary Prevention</h3>
+                            <p class="text-rose-700 font-bold mb-3"><span class="reveal-text">Disability Limitation</span> <br>+<br> <span class="reveal-text">Rehabilitation</span></p>
+                            <p class="text-sm text-rose-600">Action taken to <em>restore</em> function and prevent complications.</p>
+                        </div>
+                    </div>
+
+                    <button onclick="openQuiz('leavell')" class="w-full bg-slate-800 text-white font-black py-4 rounded-xl shadow-md hover:bg-slate-900 transition-colors flex items-center justify-center text-lg"><i class="fa-solid fa-list-check mr-3 text-2xl text-prev-accent"></i> Take Active Recall Quiz</button>
+                </div>
+            </section>
+
+            <!-- PRIMORDIAL & PRIMARY -->
+            <section id="primordial_primary" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 flex items-center border-b-2 border-prev pb-3">
+                        <i class="fa-solid fa-seedling text-emerald-500 mr-4"></i> Primordial & Primary Prevention
+                    </h2>
+
+                    <div class="space-y-6">
+                        <!-- Primordial -->
+                        <div class="bg-sky-50 rounded-xl p-6 border-l-8 border-sky-500 shadow-sm">
+                            <h3 class="font-black text-2xl text-sky-900 mb-2">Primordial Prevention</h3>
+                            <p class="text-sky-800 font-medium mb-3"><strong>Focus:</strong> Preventing the <span class="reveal-text font-bold text-sky-900">development of the risk factors themselves</span> in the general population.</p>
+                            <div class="bg-white p-4 rounded border border-sky-100 text-sm text-slate-700">
+                                <strong class="block mb-2 text-sky-700">Examples (Often involves public policy & societal changes):</strong>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Banning junk food advertisements targeted at children.</li>
+                                    <li>National policies to create safe bike lanes to prevent sedentary lifestyles.</li>
+                                    <li>Preventing the initiation of smoking among the youth.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Primary -->
+                        <div class="bg-emerald-50 rounded-xl p-6 border-l-8 border-emerald-500 shadow-sm">
+                            <h3 class="font-black text-2xl text-emerald-900 mb-2">Primary Prevention</h3>
+                            <p class="text-emerald-800 font-medium mb-3"><strong>Focus:</strong> Preventing the disease before it occurs. The target population is <span class="reveal-text font-bold text-emerald-900">healthy individuals</span>.</p>
+                            <div class="bg-white p-4 rounded border border-emerald-100 text-sm text-slate-700">
+                                <strong class="block mb-2 text-emerald-700">Examples (Health Promotion & Specific Protection):</strong>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li><span class="reveal-text font-bold text-emerald-800">Immunization / Vaccination</span> (EPI Program).</li>
+                                    <li>Health education on healthy lifestyle and breastfeeding.</li>
+                                    <li>Environmental sanitation and handwashing.</li>
+                                    <li>Smoking cessation campaigns.</li>
+                                    <li>Wearing seatbelts and helmets.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="openQuiz('primordial_primary')" class="mt-8 w-full bg-slate-800 text-white font-black py-4 rounded-xl shadow-md hover:bg-slate-900 transition-colors flex items-center justify-center text-lg"><i class="fa-solid fa-list-check mr-3 text-2xl text-prev-accent"></i> Take Active Recall Quiz</button>
+                </div>
+            </section>
+
+            <!-- SECONDARY & TERTIARY -->
+            <section id="secondary_tertiary" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 flex items-center border-b-2 border-prev pb-3">
+                        <i class="fa-solid fa-stethoscope text-amber-500 mr-4"></i> Secondary & Tertiary Prevention
+                    </h2>
+
+                    <div class="space-y-6">
+                        <!-- Secondary -->
+                        <div class="bg-amber-50 rounded-xl p-6 border-l-8 border-amber-500 shadow-sm">
+                            <h3 class="font-black text-2xl text-amber-900 mb-2">Secondary Prevention</h3>
+                            <p class="text-amber-800 font-medium mb-3"><strong>Focus:</strong> <span class="reveal-text font-bold text-amber-900">Early diagnosis and prompt treatment</span> to halt disease progression.</p>
+                            <p class="text-sm text-amber-700 mb-3 italic">Target: People who are largely asymptomatic but have risk factors, or those in the very early stages of disease.</p>
+                            <div class="bg-white p-4 rounded border border-amber-100 text-sm text-slate-700">
+                                <strong class="block mb-2 text-amber-700">Examples (Screening & Case Finding):</strong>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li><span class="reveal-text font-bold text-amber-800">Screening</span> for hypertension, diabetes, and cancer.</li>
+                                    <li><span class="reveal-text font-bold text-amber-800">Pap smear</span> and Breast Self-Examination (BSE).</li>
+                                    <li>Case finding for TB and leprosy.</li>
+                                    <li>Prenatal check-ups.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tertiary -->
+                        <div class="bg-rose-50 rounded-xl p-6 border-l-8 border-rose-500 shadow-sm">
+                            <h3 class="font-black text-2xl text-rose-900 mb-2">Tertiary Prevention</h3>
+                            <p class="text-rose-800 font-medium mb-3"><strong>Focus:</strong> <span class="reveal-text font-bold text-rose-900">Disability limitation and rehabilitation</span> to restore function.</p>
+                            <p class="text-sm text-rose-700 mb-3 italic">Target: People with an established, symptomatic, or chronic disease.</p>
+                            <div class="bg-white p-4 rounded border border-rose-100 text-sm text-slate-700">
+                                <strong class="block mb-2 text-rose-700">Examples (Restoration & Complication Prevention):</strong>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li><span class="reveal-text font-bold text-rose-800">Physical therapy</span> for stroke patients.</li>
+                                    <li>Foot care for diabetics to prevent amputation.</li>
+                                    <li>Community-Based Rehabilitation for PWDs.</li>
+                                    <li>Home care for the chronically ill or dying.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="openQuiz('secondary_tertiary')" class="mt-8 w-full bg-slate-800 text-white font-black py-4 rounded-xl shadow-md hover:bg-slate-900 transition-colors flex items-center justify-center text-lg"><i class="fa-solid fa-list-check mr-3 text-2xl text-prev-accent"></i> Take Active Recall Quiz</button>
+                </div>
+            </section>
+
+            <!-- SUMMARY & MNEMONICS -->
+            <section id="summary" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 flex items-center border-b-2 border-prev pb-3">
+                        <i class="fa-solid fa-table-list text-indigo-500 mr-4"></i> Quick Reference & Mnemonics
+                    </h2>
+                    
+                    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mb-8 text-center">
+                        <h3 class="text-xl font-bold text-indigo-800 mb-4">Mnemonic: The P.S.R. Framework</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-emerald-500">
+                                <span class="text-2xl font-black text-emerald-600 block mb-1">Prevent</span>
+                                <span class="text-sm text-slate-600 font-medium">Primary Prevention<br>(Stop before it starts)</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-amber-500">
+                                <span class="text-2xl font-black text-amber-600 block mb-1">Screen</span>
+                                <span class="text-sm text-slate-600 font-medium">Secondary Prevention<br>(Find early, treat promptly)</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm border-t-4 border-rose-500">
+                                <span class="text-2xl font-black text-rose-600 block mb-1">Restore</span>
+                                <span class="text-sm text-slate-600 font-medium">Tertiary Prevention<br>(Limit disability, rehab)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                        <table class="w-full text-left text-sm md:text-base">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="p-3 font-bold w-1/4">Level</th>
+                                    <th class="p-3 font-bold w-1/4">Also Known As</th>
+                                    <th class="p-3 font-bold w-1/4">Target Population</th>
+                                    <th class="p-3 font-bold">Example</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700 bg-white">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-black text-sky-700">Primordial</td>
+                                    <td class="p-3"><span class="reveal-text font-semibold">Prevention of risk factors</span></td>
+                                    <td class="p-3">General population (esp. children)</td>
+                                    <td class="p-3">Banning junk food ads to kids</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 bg-slate-50/50">
+                                    <td class="p-3 font-black text-emerald-700">Primary</td>
+                                    <td class="p-3"><span class="reveal-text font-semibold">Health promotion & specific protection</span></td>
+                                    <td class="p-3">Healthy individuals</td>
+                                    <td class="p-3">Vaccination, handwashing</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-black text-amber-600">Secondary</td>
+                                    <td class="p-3"><span class="reveal-text font-semibold">Early diagnosis & treatment</span></td>
+                                    <td class="p-3">Asymptomatic with risk factors</td>
+                                    <td class="p-3">BP screening, Pap smear</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 bg-slate-50/50">
+                                    <td class="p-3 font-black text-rose-700">Tertiary</td>
+                                    <td class="p-3"><span class="reveal-text font-semibold">Rehabilitation & disability limitation</span></td>
+                                    <td class="p-3">People with established disease</td>
+                                    <td class="p-3">Stroke rehab, diabetes foot care</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <button onclick="openQuiz('summary')" class="mt-8 w-full bg-slate-800 text-white font-black py-4 rounded-xl shadow-md hover:bg-slate-900 transition-colors flex items-center justify-center text-lg"><i class="fa-solid fa-list-check mr-3 text-2xl text-prev-accent"></i> Take Active Recall Quiz</button>
+                </div>
+            </section>
+
+            <!-- FINAL EXAM -->
+            <section id="final_quiz_sec" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8 text-center min-h-[60vh] flex flex-col justify-center items-center">
+                    <i class="fa-solid fa-trophy text-8xl text-amber-400 mb-6 drop-shadow-md"></i>
+                    <h2 class="text-4xl font-black text-slate-800 mb-4">Final Comprehensive Exam</h2>
+                    <p class="text-lg text-slate-600 mb-8 max-w-2xl">You have mastered the continuum of prevention! Test your ability to identify the correct level of prevention in these 20 clinical scenarios. You need 75% to pass.</p>
+                    <button onclick="openQuiz('final_quiz')" class="w-full max-w-md bg-slate-800 text-white font-black py-4 rounded-xl shadow-md hover:bg-slate-900 transition-colors text-xl">Start Final Exam</button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+             <button onclick="closeQuiz()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors focus:outline-none"><i class="fa-solid fa-xmark text-2xl"></i></button>
+             <h2 id="quiz-title" class="text-3xl font-black text-slate-800 mb-2"></h2>
+             <p class="text-slate-600 mb-6 font-medium border-b border-slate-200 pb-4">You must score at least <span class="font-bold text-prev">75%</span> to unlock the next section.</p>
+             <div id="quiz-questions-container" class="space-y-6"></div>
+             <button id="quiz-submit-btn" onclick="submitQuiz()" class="mt-8 w-full bg-prev text-white font-bold py-4 rounded-xl hover:bg-prev-dark transition-colors shadow-lg text-lg">Submit Answers</button>
+             <div id="quiz-result-container" class="hidden mt-6 text-center"></div>
+        </div>
+    </div>
+
+    <script>
+        let unlockedSections = ['home', 'leavell']; // Allow access to first content section immediately
+
+        const quizzes = {
+            'leavell': {
+                title: 'Leavell & Clark\'s Framework',
+                next: 'primordial_primary',
+                questions: [
+                    { q: "According to Leavell's framework, which two components make up Primary Prevention?", options: ["Health promotion & specific protection", "Early diagnosis & prompt treatment", "Disability limitation & rehabilitation", "Screening & health education"], ans: 0 },
+                    { q: "Early diagnosis and prompt treatment correspond to which level of prevention?", options: ["Primordial", "Primary", "Secondary", "Tertiary"], ans: 2 },
+                    { q: "Disability limitation and rehabilitation are the core components of which level of prevention?", options: ["Primordial", "Primary", "Secondary", "Tertiary"], ans: 3 },
+                    { q: "Actions taken before the disease occurs to prevent its onset are classified as:", options: ["Primary Prevention", "Secondary Prevention", "Tertiary Prevention", "Restoration"], ans: 0 },
+                    { q: "What is the primary goal of Secondary Prevention in Leavell's framework?", options: ["To prevent the emergence of risk factors", "To promote general well-being", "To halt the disease process early", "To restore maximum function after a stroke"], ans: 2 }
+                ]
+            },
+            'primordial_primary': {
+                title: 'Primordial & Primary Prevention',
+                next: 'secondary_tertiary',
+                questions: [
+                    { q: "Which level of prevention focuses on preventing the development of the risk factors themselves?", options: ["Primordial", "Primary", "Secondary", "Tertiary"], ans: 0 },
+                    { q: "A community nurse administers the BCG vaccine to a newborn. This is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 },
+                    { q: "Lobbying the government to ban junk food advertisements targeted at children is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 0 },
+                    { q: "Providing health education to a group of healthy teenagers about the dangers of smoking is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 },
+                    { q: "Who is the primary target population for Primary Prevention?", options: ["People with established chronic diseases", "Asymptomatic individuals with high risk factors", "Healthy individuals", "Patients recovering from surgery"], ans: 2 }
+                ]
+            },
+            'secondary_tertiary': {
+                title: 'Secondary & Tertiary Prevention',
+                next: 'summary',
+                questions: [
+                    { q: "A 45-year-old woman undergoes her annual Pap smear. This procedure is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 2 },
+                    { q: "Teaching a patient with diabetes how to perform daily foot care to prevent ulcers and amputation is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 3 },
+                    { q: "Conducting a community-wide blood pressure screening program is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 2 },
+                    { q: "A nurse provides physical therapy to a patient who recently suffered a stroke. Which level of prevention is this?", options: ["Primordial", "Primary", "Secondary", "Tertiary"], ans: 3 },
+                    { q: "Case finding for Tuberculosis in a highly populated barangay falls under which level of prevention?", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 2 }
+                ]
+            },
+            'summary': {
+                title: 'Quick Reference & Mnemonics',
+                next: 'final_quiz_sec',
+                questions: [
+                    { q: "In the P.S.R. mnemonic, what does the 'S' stand for?", options: ["Stop", "Screen", "Sanitize", "Support"], ans: 1 },
+                    { q: "Which level of prevention is targeted at people with established, symptomatic diseases?", options: ["Primordial", "Primary", "Secondary", "Tertiary"], ans: 3 },
+                    { q: "Prenatal check-ups are generally classified under which level of prevention?", options: ["Primordial", "Primary", "Secondary", "Tertiary"], ans: 2 },
+                    { q: "Environmental sanitation, such as ensuring safe drinking water, is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 },
+                    { q: "The 'R' in the P.S.R. framework stands for Restore. Which level of prevention does this represent?", options: ["Primordial", "Primary", "Secondary", "Tertiary"], ans: 3 }
+                ]
+            }
+        };
+
+        // Generate the 20-item Final Quiz
+        quizzes['final_quiz'] = {
+            title: 'Final Comprehensive Exam',
+            next: null,
+            questions: [
+                { q: "A public health nurse is conducting a campaign to encourage the local government to build safe walking paths to prevent sedentary lifestyles in the future. This is:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 0 },
+                { q: "Administering the measles vaccine to a 9-month-old infant represents:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 },
+                { q: "A patient with chronic COPD attends a pulmonary rehabilitation clinic to improve breathing techniques. This is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 3 },
+                { q: "Performing a Breast Self-Examination (BSE) monthly is categorized as:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 2 },
+                { q: "According to Leavell's framework, health promotion and specific protection belong to:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 },
+                { q: "A nurse provides home care for a chronically ill, bedridden patient to prevent pressure ulcers. This falls under:", options: ["Primary Prevention", "Secondary Prevention", "Tertiary Prevention", "Quaternary Prevention"], ans: 2 },
+                { q: "Screening asymptomatic adults for hyperlipidemia (high cholesterol) is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 2 },
+                { q: "Which level of prevention aims to halt disease progression through early diagnosis and prompt treatment?", options: ["Primary", "Secondary", "Tertiary", "Primordial"], ans: 1 },
+                { q: "A community health nurse teaches mothers about exclusive breastfeeding to boost infant immunity. This is:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 },
+                { q: "A national law banning smoking in all public places to prevent the youth from picking up the habit represents:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 0 },
+                { q: "In the mnemonic 'Prevent - Screen - Restore', which word correlates with Tertiary Prevention?", options: ["Prevent", "Screen", "Restore", "None of the above"], ans: 2 },
+                { q: "A nurse performs contact tracing for a newly identified case of Leprosy. This action is:", options: ["Primary Prevention", "Secondary Prevention", "Tertiary Prevention", "Primordial Prevention"], ans: 1 },
+                { q: "Disability limitation is a core component of which level of prevention?", options: ["Primary", "Secondary", "Tertiary", "Primordial"], ans: 2 },
+                { q: "Educating a group of construction workers on the mandatory use of hard hats (helmets) is an example of:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 },
+                { q: "A patient who suffered a myocardial infarction is prescribed a low-sodium diet and aspirin to prevent a second heart attack. This is:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 3 },
+                { q: "Which target population is primarily the focus of Secondary Prevention?", options: ["General healthy population", "Children", "Asymptomatic individuals with risk factors", "People with severe disabilities"], ans: 2 },
+                { q: "Routine prenatal check-ups to monitor the mother and fetus for early signs of complications is categorized as:", options: ["Primary Prevention", "Secondary Prevention", "Tertiary Prevention", "Primordial Prevention"], ans: 1 },
+                { q: "A school nurse conducts a scoliosis screening for all 7th-grade students. This is:", options: ["Primary Prevention", "Secondary Prevention", "Tertiary Prevention", "Primordial Prevention"], ans: 1 },
+                { q: "Providing a wheelchair and ramps for a patient who underwent a bilateral leg amputation is an example of:", options: ["Primary Prevention", "Secondary Prevention", "Tertiary Prevention", "Primordial Prevention"], ans: 2 },
+                { q: "The continuous chlorination of the municipal water supply to prevent waterborne diseases is:", options: ["Primordial Prevention", "Primary Prevention", "Secondary Prevention", "Tertiary Prevention"], ans: 1 }
+            ]
+        };
+
+        function unlockFirstSection() {
+            showSection('leavell');
+        }
+
+        // Tab Navigation Logic
+        function showSection(sectionId) {
+            if (!unlockedSections.includes(sectionId) && sectionId !== 'home') {
+                alert("Please pass the Active Recall Quiz at the bottom of the previous section to unlock this content.");
+                return;
+            }
+
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            
+            const target = document.getElementById(sectionId);
+            if(target) {
+                target.classList.remove('hidden');
+                target.classList.add('block');
+            }
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-prev-light', 'text-prev-dark', 'border-r-4', 'border-prev-dark');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById('btn-' + sectionId);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-slate-600');
+                activeBtn.classList.add('bg-prev-light', 'text-prev-dark', 'border-r-4', 'border-prev-dark');
+            }
+
+            if(window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('hidden');
+                document.getElementById('sidebar').classList.remove('flex', 'absolute', 'h-full', 'z-50');
+            }
+            
+            document.querySelector('main').scrollTop = 0;
+        }
+
+        function updateSidebarUI() {
+            const sections = ['home', 'leavell', 'primordial_primary', 'secondary_tertiary', 'summary', 'final_quiz_sec'];
+            sections.forEach(sec => {
+                const btn = document.getElementById('btn-' + sec);
+                if (!btn) return;
+                
+                const lockIcon = btn.querySelector('.fa-lock');
+                const mainIcon = btn.querySelector('.nav-icon');
+
+                if (unlockedSections.includes(sec) || sec === 'home') {
+                    btn.classList.remove('locked-section');
+                    if (lockIcon) lockIcon.classList.add('hidden');
+                    if (mainIcon) mainIcon.classList.remove('hidden');
+                } else {
+                    btn.classList.add('locked-section');
+                    if (lockIcon) lockIcon.classList.remove('hidden');
+                    if (mainIcon) mainIcon.classList.add('hidden');
+                }
+            });
+        }
+
+        let currentQuizSection = null;
+
+        function openQuiz(sectionId) {
+            currentQuizSection = sectionId;
+            const qData = quizzes[sectionId];
+            if(!qData) return;
+            
+            document.getElementById('quiz-title').innerText = qData.title;
+            const container = document.getElementById('quiz-questions-container');
+            container.innerHTML = '';
+            
+            qData.questions.forEach((q, index) => {
+                let html = `<div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <p class="font-bold text-slate-800 mb-3 text-lg">${index + 1}. ${q.q}</p>
+                    <div class="space-y-2">`;
+                q.options.forEach((opt, oIndex) => {
+                    html += `<label class="flex items-start space-x-3 p-3 rounded-lg border border-transparent hover:border-prev hover:bg-prev-light/30 cursor-pointer transition-colors">
+                        <input type="radio" name="q${index}" value="${oIndex}" class="form-radio text-prev focus:ring-prev h-5 w-5 mt-0.5">
+                        <span class="text-slate-700 font-medium">${opt}</span>
+                    </label>`;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+            
+            document.getElementById('quiz-submit-btn').classList.remove('hidden');
+            document.getElementById('quiz-result-container').classList.add('hidden');
+            document.getElementById('quiz-modal').classList.remove('hidden');
+        }
+
+        function closeQuiz() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+        }
+
+        function submitQuiz() {
+            const qData = quizzes[currentQuizSection];
+            let score = 0;
+            
+            for(let i=0; i<qData.questions.length; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if(selected && parseInt(selected.value) === qData.questions[i].ans) {
+                    score++;
+                }
+            }
+            
+            const percentage = (score / qData.questions.length) * 100;
+            const resultContainer = document.getElementById('quiz-result-container');
+            const submitBtn = document.getElementById('quiz-submit-btn');
+            
+            submitBtn.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+            
+            if(percentage >= 75) {
+                if (currentQuizSection === 'final_quiz') {
+                    resultContainer.innerHTML = `
+                        <div class="text-amber-500 mb-4 animate-bounce"><i class="fa-solid fa-trophy text-6xl drop-shadow-md"></i></div>
+                        <h3 class="text-3xl font-black text-slate-800">Congratulations!</h3>
+                        <p class="text-xl font-bold text-slate-600 mt-2">You scored ${score}/${qData.questions.length} (${percentage}%)</p>
+                        <p class="text-amber-700 mt-3 font-medium bg-amber-50 py-2 rounded-lg border border-amber-200">You have officially mastered the Levels of Prevention!</p>
+                        <button onclick="closeQuiz()" class="mt-6 w-full bg-slate-800 text-white font-black py-4 rounded-xl hover:bg-slate-900 shadow-md text-lg transition-transform hover:scale-[1.02]">Close Exam</button>
+                    `;
+                    return;
+                }
+
+                if(qData.next && !unlockedSections.includes(qData.next)) {
+                    unlockedSections.push(qData.next);
+                    updateSidebarUI(); 
+                }
+                
+                let btnAction = `<button onclick="closeQuiz(); showSection('${qData.next}')" class="mt-6 w-full bg-emerald-600 text-white font-black py-4 rounded-xl hover:bg-emerald-700 shadow-md text-lg transition-transform hover:scale-[1.02]">Proceed to Next Section <i class="fa-solid fa-arrow-right ml-2"></i></button>`;
+                
+                resultContainer.innerHTML = `
+                    <div class="text-emerald-600 mb-4 animate-bounce"><i class="fa-solid fa-circle-check text-6xl drop-shadow-md"></i></div>
+                    <h3 class="text-3xl font-black text-slate-800">Passed!</h3>
+                    <p class="text-xl font-bold text-slate-600 mt-2">You scored ${score}/${qData.questions.length} (${percentage}%)</p>
+                    <p class="text-emerald-700 mt-3 font-medium bg-emerald-50 py-2 rounded-lg border border-emerald-200">Great job. You have unlocked the next section.</p>
+                    ${btnAction}
+                `;
+            } else {
+                resultContainer.innerHTML = `
+                    <div class="text-red-500 mb-4"><i class="fa-solid fa-circle-xmark text-6xl drop-shadow-md"></i></div>
+                    <h3 class="text-3xl font-black text-slate-800">Failed.</h3>
+                    <p class="text-xl font-bold text-slate-600 mt-2">You scored ${score}/${qData.questions.length} (${percentage}%)</p>
+                    <p class="text-red-700 mt-3 font-medium bg-red-50 py-2 rounded-lg border border-red-200">You need at least 75% to unlock the next section. Please review the material and try again.</p>
+                    <button onclick="openQuiz('${currentQuizSection}')" class="mt-6 w-full bg-slate-200 text-slate-800 font-black py-4 rounded-xl hover:bg-slate-300 shadow-md text-lg transition-colors"><i class="fa-solid fa-rotate-right mr-2"></i> Try Again</button>
+                `;
+            }
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('hidden')) {
+                sidebar.classList.remove('hidden');
+                sidebar.classList.add('flex', 'absolute', 'h-full', 'z-50');
+            } else {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('flex', 'absolute', 'h-full', 'z-50');
+            }
+        }
+
+        let recallModeActive = false;
+        
+        function toggleRecallMode() {
+            recallModeActive = !recallModeActive;
+            const toggle = document.getElementById('recall-toggle');
+            const knob = document.getElementById('recall-knob');
+            const revealTexts = document.querySelectorAll('.reveal-text');
+
+            if (recallModeActive) {
+                toggle.classList.remove('bg-slate-300');
+                toggle.classList.add('bg-prev-dark');
+                knob.classList.add('translate-x-6');
+                document.body.classList.add('recall-mode');
+                revealTexts.forEach(el => el.classList.remove('revealed'));
+            } else {
+                toggle.classList.add('bg-slate-300');
+                toggle.classList.remove('bg-prev-dark');
+                knob.classList.remove('translate-x-6');
+                document.body.classList.remove('recall-mode');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.reveal-text').forEach(item => {
+                item.addEventListener('click', function() {
+                    if (recallModeActive) {
+                        this.classList.toggle('revealed');
+                    }
+                });
+            });
+            updateSidebarUI();
+        });
+    </script>
+</body>
+</html>
